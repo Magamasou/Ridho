@@ -1,0 +1,27 @@
+version: '3'
+
+tasks:
+  clean:
+    desc: Clean
+    cmds:
+      - rm -rf dist
+
+  build:
+    desc: Build
+    deps: [ generate-ui ]
+    cmds:
+      - goreleaser --snapshot --clean
+
+  generate-ui:
+    cmds:
+      - cd ../ui && eval `mise env` && task build
+      - rm -rf resources/ui
+      - mkdir -p resources/ui
+      - cp -r ../ui/dist/* resources/ui
+
+  dependencyUpdates:
+    desc: Show dependency updates
+    cmds:
+      - go mod download
+      - go mod tidy
+      - go list -u -m -json all | go-mod-outdated -update -direct
